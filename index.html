@@ -179,6 +179,9 @@
         const operandList = operands.split(/\s*\+\s*|\s*-\s*|\s*\*\s*|\s*\//); // Split by operators
         let result = null;
 
+        const operatorMatch = operands.match(/([+\-*\/])/);
+        if (!operatorMatch) return null; // No operator found
+
         for (const operand of operandList) {
             const value = evaluateExpression(operand.trim(), variables);
             if (value === null) {
@@ -188,14 +191,21 @@
                 result = value; // Initialize result
             } else {
                 // Perform the operation based on the specified operation type
-                if (operation === "sum") {
-                    result += value; // Addition
-                } else if (operation === "sub") {
-                    result -= value; // Subtraction
-                } else if (operation === "mul") {
-                    result *= value; // Multiplication
-                } else if (operation === "div") {
-                    result /= value; // Division
+                switch (operation) {
+                    case "sum":
+                        result += value; // Addition
+                        break;
+                    case "sub":
+                        result -= value; // Subtraction
+                        break;
+                    case "mul":
+                        result *= value; // Multiplication
+                        break;
+                    case "div":
+                        result /= value; // Division
+                        break;
+                    default:
+                        return null; // Invalid operation
                 }
             }
         }
