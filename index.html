@@ -87,9 +87,9 @@
             }
 
             // Print variable using print(var.name)
-            const printMatch = trimmedLine.match(/print\((var\.\w+)\)/);
+            const printMatch = trimmedLine.match(/print\((var\.(\w+))\)/);
             if (printMatch) {
-                const varToPrint = printMatch[1];
+                const varToPrint = printMatch[2]; // Get just the variable name without 'var.'
                 if (variables.hasOwnProperty(varToPrint)) {
                     result += variables[varToPrint] + "\n";
                 } else {
