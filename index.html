@@ -28,7 +28,19 @@
 </head>
 <body>
 
-<h1>Codigo Editor</h1>
+<!-- Using text variables to set the content -->
+<script>
+    const text = {
+        var: {
+            head: "Hello this is the codigo editor",
+            para: "Enter code"
+        }
+    };
+
+    document.write(`<h1>${text.var.head}</h1>`);
+    document.write(`<p>${text.var.para}</p>`);
+</script>
+
 <textarea id="codeInput" placeholder="Write your Codigo code here..."></textarea>
 <button id="runButton">Run Code</button>
 
