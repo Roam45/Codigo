@@ -80,6 +80,8 @@
                 // Handle string
                 else if (/^".*"$/.test(value) || /^'.*'$/.test(value)) {
                     variables[varName] = value.slice(1, -1); // Remove quotes
+                } else {
+                    result += `Error: Invalid value assigned to ${varName}\n`;
                 }
                 continue;
             }
@@ -88,7 +90,11 @@
             const printMatch = trimmedLine.match(/print\((var\.\w+)\)/);
             if (printMatch) {
                 const varToPrint = printMatch[1];
-                result += (variables[varToPrint] !== undefined ? variables[varToPrint] : "Undefined variable") + "\n";
+                if (variables[varToPrint] !== undefined) {
+                    result += variables[varToPrint] + "\n";
+                } else {
+                    result += `Undefined variable: ${varToPrint}\n`;
+                }
                 continue;
             }
 
