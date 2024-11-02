@@ -19,17 +19,10 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            background-color: #282c34;
-            color: #abb2bf;
+            background-color: #fff;
             resize: none;
-            overflow: auto;
-            white-space: pre;
         }
-        #editor:focus {
-            border-color: #28a745;
-            outline: none;
-        }
-        #runButton, #downloadButton {
+        #runButton {
             margin-top: 10px;
             padding: 10px 20px;
             font-size: 16px;
@@ -38,11 +31,6 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: transform 0.2s, background-color 0.3s;
-        }
-        #runButton:hover, #downloadButton:hover {
-            transform: scale(1.05);
-            background-color: #218838;
         }
         #output {
             margin-top: 20px;
@@ -51,19 +39,7 @@
             border-radius: 4px;
             background-color: #fff;
             white-space: pre-wrap;
-            opacity: 0;
-            transition: opacity 0.5s;
         }
-        #output.visible {
-            opacity: 1;
-        }
-        #fileInput {
-            margin-top: 10px;
-        }
-        .keyword { color: #569cd6; }
-        .variable { color: #d19a66; }
-        .string { color: #98c379; }
-        .error { color: #e06c75; }
     </style>
 </head>
 <body>
@@ -75,42 +51,11 @@
 <h2>Output:</h2>
 <div id="output"></div>
 
-<input type="file" id="fileInput" accept=".codi" />
-<button id="downloadButton">Download Código</button>
-
 <script>
     document.getElementById('runButton').onclick = function() {
         const code = document.getElementById('editor').value;
         const output = runCodigoCode(code);
-        const outputDiv = document.getElementById('output');
-        outputDiv.textContent = output;
-        outputDiv.classList.add('visible');
-        highlightCode(code);
-    };
-
-    document.getElementById('fileInput').addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('editor').value = e.target.result;
-                highlightCode(e.target.result);
-            };
-            reader.readAsText(file);
-        }
-    });
-
-    document.getElementById('downloadButton').onclick = function() {
-        const code = document.getElementById('editor').value;
-        const blob = new Blob([code], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'code.codi';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        document.getElementById('output').textContent = output;
     };
 
     function runCodigoCode(code) {
@@ -122,42 +67,29 @@
         for (const line of lines) {
             const trimmedLine = line.trim();
 
-            // Variable assignment like var.x = value
+            // Variable assignment with var.name = value
             const variableAssignmentMatch = trimmedLine.match(/var\.(\w+)\s*=\s*(.+)/);
             if (variableAssignmentMatch) {
                 const varName = variableAssignmentMatch[1];
                 const value = variableAssignmentMatch[2].trim();
 
-                // Check for math operations like math.sum x + y = var.z
-                const mathOperationMatch = value.match(/math\.(\w+)\s+(.+)\s*=\s*(var\.\w+)/);
-                if (mathOperationMatch) {
-                    const operation = mathOperationMatch[1];
-                    const operands = mathOperationMatch[2].trim();
-                    const resultVarName = mathOperationMatch[3].substring(4); // Remove 'var.'
-                    
-                    const evaluatedResult = evaluateMathOperation(operation, operands, variables);
-                    if (evaluatedResult !== null) {
-                        variables[resultVarName] = evaluatedResult;
-                    } else {
-                        result += `Error: Invalid operation or undefined variable in "${line}"\n`;
-                    }
-                    continue;
-                }
-
-                // Evaluate simple expressions
-                const evaluatedValue = evaluateExpression(value, variables);
-                if (evaluatedValue !== null) {
-                    variables[varName] = evaluatedValue;
+                // Handle number
+                if (/^-?\d+(\.\d+)?$/.test(value)) {
+                    variables[varName] = parseFloat(value);
+                } 
+                // Handle string
+                else if (/^".*"$/.test(value) || /^'.*'$/.test(value)) {
+                    variables[varName] = value.slice(1, -1); // Remove quotes
                 } else {
-                    result += `Error: Invalid expression assigned to ${varName}\n`;
+                    result += `Error: Invalid value assigned to ${varName}\n`;
                 }
                 continue;
             }
 
-            // Print variable using print(var.x)
-            const printMatch = trimmedLine.match(/print\(var\.(\w+)\)/);
+            // Print variable using print(var.name)
+            const printMatch = trimmedLine.match(/print\((var\.(\w+))\)/);
             if (printMatch) {
-                const varToPrint = printMatch[1]; // Get just the variable name without 'var.'
+                const varToPrint = printMatch[2];
                 if (variables.hasOwnProperty(varToPrint)) {
                     result += variables[varToPrint] + "\n";
                 } else {
@@ -173,81 +105,6 @@
         }
 
         return result.trim();
-    }
-
-    function evaluateMathOperation(operation, operands, variables) {
-        const operandList = operands.split(/\s*\+\s*|\s*-\s*|\s*\*\s*|\s*\//); // Split by operators
-        let result = null;
-
-        const operatorMatch = operands.match(/([+\-*\/])/);
-        if (!operatorMatch) return null; // No operator found
-
-        for (const operand of operandList) {
-            const value = evaluateExpression(operand.trim(), variables);
-            if (value === null) {
-                return null; // If any operand is invalid, return null
-            }
-            if (result === null) {
-                result = value; // Initialize result
-            } else {
-                // Perform the operation based on the specified operation type
-                switch (operation) {
-                    case "sum":
-                        result += value; // Addition
-                        break;
-                    case "sub":
-                        result -= value; // Subtraction
-                        break;
-                    case "mul":
-                        result *= value; // Multiplication
-                        break;
-                    case "div":
-                        result /= value; // Division
-                        break;
-                    default:
-                        return null; // Invalid operation
-                }
-            }
-        }
-
-        return result;
-    }
-
-    function evaluateExpression(expr, variables) {
-        // Handle variable references
-        const variableMatch = expr.match(/var\.(\w+)/);
-        if (variableMatch) {
-            const varName = variableMatch[1];
-            if (variables.hasOwnProperty(varName)) {
-                return variables[varName];
-            } else {
-                return null; // Undefined variable
-            }
-        }
-
-        // Evaluate simple arithmetic expressions
-        try {
-            const sanitizedExpr = expr
-                .replace(/var\.(\w+)/g, (match) => {
-                    const varName = match.substring(4);
-                    return variables.hasOwnProperty(varName) ? variables[varName] : 'undefined';
-                });
-            return eval(sanitizedExpr); // Caution: using eval can be dangerous
-        } catch (e) {
-            return null; // In case of an error in evaluation
-        }
-    }
-
-    function highlightCode(code) {
-        const highlightedCode = code
-            .replace(/(var\.|print\()(\w+)(\))/g, '<span class="keyword">$1$2$3</span>') // Keywords
-            .replace(/(var\.\w+\s*=\s*)([^;]+)/g, (match, p1, p2) => {
-                const variable = p1 + '<span class="variable">' + p2 + '</span>';
-                return variable;
-            }) // Variable assignment
-            .replace(/("[^"]*"|'[^']*')/g, '<span class="string">$1</span>'); // Strings
-        
-        document.getElementById('editor').innerHTML = highlightedCode;
     }
 </script>
 
