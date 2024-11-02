@@ -78,8 +78,8 @@
                     variables[varName] = parseFloat(value);
                 } 
                 // Handle string
-                else if (/^".*"|'[^']*'$/.test(value)) {
-                    variables[varName] = value.replace(/^["']|["']$/g, ''); // Remove quotes
+                else if (/^".*"$/.test(value) || /^'.*'$/.test(value)) {
+                    variables[varName] = value.slice(1, -1); // Remove quotes
                 }
                 continue;
             }
@@ -90,6 +90,11 @@
                 const varToPrint = printMatch[1];
                 result += (variables[varToPrint] !== undefined ? variables[varToPrint] : "Undefined variable") + "\n";
                 continue;
+            }
+
+            // Handle invalid lines or other commands
+            if (trimmedLine) {
+                result += `Error: Unrecognized command: "${trimmedLine}"\n`;
             }
         }
 
