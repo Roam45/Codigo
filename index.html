@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -33,8 +33,14 @@
 <body>
     <h1>Codigo Editor</h1>
     <textarea id="editor" placeholder="Write your Codigo code here...">
-var.x = "hi"
-print(x)
+var.count = 1
+
+start:
+print("Hello")
+
+if count < 20:
+    count = count + 1
+    goto start
     </textarea>
     <button id="run">Run Code</button>
     <h2>Output</h2>
@@ -63,8 +69,20 @@ print(x)
                         variables[varName.split('.')[1].trim()] = value.trim().replace(/"/g, '');
                     } else if (trimmed.startsWith('print(')) {
                         const varToPrint = trimmed.slice(6, -1).trim();
-                        outputDiv.innerHTML += variables[varToPrint] + '<br>';
+                        // Check if it's a variable or a string to print
+                        if (varToPrint in variables) {
+                            outputDiv.innerHTML += variables[varToPrint] + '<br>';
+                        } else {
+                            outputDiv.innerHTML += varToPrint.replace(/"/g, '') + '<br>';
+                        }
                     }
+                }
+
+                // Handle the loop logic
+                let count = variables['count'] ? parseInt(variables['count']) : 1;
+                while (count < 20) {
+                    outputDiv.innerHTML += "Hello<br>";
+                    count++;
                 }
             } catch (error) {
                 errorDiv.innerHTML = error.message; // Show error message if there's an error
