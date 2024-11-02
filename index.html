@@ -68,8 +68,8 @@
         for (const line of lines) {
             const trimmedLine = line.trim();
 
-            // Numeric variable assignment with var.value.x
-            const numberAssignmentMatch = trimmedLine.match(/var\.value\.(\w+)\s*=\s*"(.*)"/);
+            // Numeric variable assignment with var.value.x(45)
+            const numberAssignmentMatch = trimmedLine.match(/var\.value\.(\w+)\s*\((.*)\)/);
             if (numberAssignmentMatch) {
                 const nickname = numberAssignmentMatch[1];
                 const value = parseFloat(numberAssignmentMatch[2]); // Convert string to number
@@ -77,8 +77,8 @@
                 continue;
             }
 
-            // Text variable assignment with text.var.value.x
-            const textAssignmentMatch = trimmedLine.match(/text\.var\.value\.(\w+)\s*=\s*"(.*)"/);
+            // Text variable assignment with text.var.value.hi(hi)
+            const textAssignmentMatch = trimmedLine.match(/text\.var\.value\.(\w+)\s*\((.*)\)/);
             if (textAssignmentMatch) {
                 const textNickname = textAssignmentMatch[1];
                 const textValue = textAssignmentMatch[2];
