@@ -68,61 +68,30 @@
         for (const line of lines) {
             const trimmedLine = line.trim();
 
-            // Numeric variable assignment with var.value.x(45)
-            const numberAssignmentMatch = trimmedLine.match(/var\.value\.(\w+)\s*\((.*)\)/);
-            if (numberAssignmentMatch) {
-                const nickname = numberAssignmentMatch[1];
-                const value = parseFloat(numberAssignmentMatch[2]); // Convert string to number
-                variables[nickname] = value; // Store numeric value with nickname
+            // Numeric variable assignment with num.var.x(4)
+            const numVarMatch = trimmedLine.match(/num\.var\.(\w+)\s*\((.*)\)/);
+            if (numVarMatch) {
+                const nickname = numVarMatch[1];
+                const value = parseFloat(numVarMatch[2]);
+                variables[nickname] = value;
                 continue;
             }
 
-            // Text variable assignment with text.var.value.hi(hi)
-            const textAssignmentMatch = trimmedLine.match(/text\.var\.value\.(\w+)\s*\((.*)\)/);
-            if (textAssignmentMatch) {
-                const textNickname = textAssignmentMatch[1];
-                const textValue = textAssignmentMatch[2];
-                textVariables[textNickname] = textValue; // Store text value
+            // Text variable assignment with text.var.text("value")
+            const textVarMatch = trimmedLine.match(/text\.var\.(\w+)\s*\("?(.*)"?\)/);
+            if (textVarMatch) {
+                const textNickname = textVarMatch[1];
+                const textValue = textVarMatch[2];
+                textVariables[textNickname] = textValue;
                 continue;
             }
 
             // Addition operation
-            const sumMatch = trimmedLine.match(/math\.sum\/(\w+)\s*=\s*var\."(\w+)"\s*\+\s*var\."(\w+)"/);
+            const sumMatch = trimmedLine.match(/math\.sum\s+(\w+)\s*\+\s*(\w+)\s*=\s*(\w+)/);
             if (sumMatch) {
-                const resultVar = sumMatch[1];
-                const operand1 = variables[sumMatch[2]] || 0;
-                const operand2 = variables[sumMatch[3]] || 0;
-                variables[resultVar] = operand1 + operand2;
-                continue;
-            }
-
-            // Subtraction operation
-            const subMatch = trimmedLine.match(/math\.sub\/(\w+)\s*=\s*var\."(\w+)"\s*-\s*var\."(\w+)"/);
-            if (subMatch) {
-                const resultVar = subMatch[1];
-                const operand1 = variables[subMatch[2]] || 0;
-                const operand2 = variables[subMatch[3]] || 0;
-                variables[resultVar] = operand1 - operand2;
-                continue;
-            }
-
-            // Multiplication operation
-            const multiMatch = trimmedLine.match(/math\.multi\/(\w+)\s*=\s*var\."(\w+)"\s*\*\s*var\."(\w+)"/);
-            if (multiMatch) {
-                const resultVar = multiMatch[1];
-                const operand1 = variables[multiMatch[2]] || 0;
-                const operand2 = variables[multiMatch[3]] || 0;
-                variables[resultVar] = operand1 * operand2;
-                continue;
-            }
-
-            // Division operation
-            const divMatch = trimmedLine.match(/math\.div\/(\w+)\s*=\s*var\."(\w+)"\s*\/\s*var\."(\w+)"/);
-            if (divMatch) {
-                const resultVar = divMatch[1];
-                const operand1 = variables[divMatch[2]] || 0;
-                const operand2 = variables[divMatch[3]] || 1; // Prevent division by zero
-                variables[resultVar] = operand1 / operand2;
+                const operand1 = variables[sumMatch[1]] || 0;
+                const operand2 = variables[sumMatch[2]] || 0;
+                variables[sumMatch[3]] = operand1 + operand2;
                 continue;
             }
 
