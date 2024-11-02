@@ -68,7 +68,7 @@
             const trimmedLine = line.trim();
 
             // Variable assignment with var.name = value
-            const variableAssignmentMatch = trimmedLine.match(/var\.(\w+)\s*=\s*(.*)/);
+            const variableAssignmentMatch = trimmedLine.match(/var\.(\w+)\s*=\s*(.+)/);
             if (variableAssignmentMatch) {
                 const varName = variableAssignmentMatch[1];
                 const value = variableAssignmentMatch[2].trim();
@@ -90,7 +90,7 @@
             const printMatch = trimmedLine.match(/print\((var\.\w+)\)/);
             if (printMatch) {
                 const varToPrint = printMatch[1];
-                if (variables[varToPrint] !== undefined) {
+                if (variables.hasOwnProperty(varToPrint)) {
                     result += variables[varToPrint] + "\n";
                 } else {
                     result += `Undefined variable: ${varToPrint}\n`;
