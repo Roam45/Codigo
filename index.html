@@ -68,6 +68,7 @@
             const lines = code.split('\n');
             let variables = {};
             let result;
+            let outputLines = []; // Array to store output lines
 
             lines.forEach(line => {
                 line = line.trim();
@@ -100,7 +101,7 @@
                                 result = parseFloat(var1) / parseFloat(var2);
                                 break;
                         }
-                        outputDiv.innerHTML += result + '\n';
+                        outputLines.push(result); // Add result to output lines
                     }
                 }
 
@@ -110,7 +111,7 @@
                     if (printVar) {
                         const varToPrint = printVar[1].trim().replace(/["']/g, '');
                         if (variables[varToPrint] !== undefined) {
-                            outputDiv.innerHTML += variables[varToPrint] + '\n';
+                            outputLines.push(variables[varToPrint]); // Add variable to output lines
                         }
                     }
                 }
@@ -121,11 +122,15 @@
                     displayPara(content);
                 }
             });
+
+            // Join output lines and set outputDiv innerHTML
+            outputDiv.innerHTML = outputLines.join('\n');
         } catch (error) {
             outputDiv.innerHTML = 'Error: ' + error.message;
         }
     });
 </script>
+
 
 </body>
 </html>
