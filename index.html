@@ -61,52 +61,33 @@
     function runCodigoCode(code) {
         let result = "";
         let variables = {};
-        let textVariables = {};
         
         const lines = code.split('\n');
         
         for (const line of lines) {
             const trimmedLine = line.trim();
 
-            // Numeric variable assignment with num.var.x(4)
-            const numVarMatch = trimmedLine.match(/num\.var\.(\w+)\s*\((.*)\)/);
-            if (numVarMatch) {
-                const nickname = numVarMatch[1];
-                const value = parseFloat(numVarMatch[2]);
-                variables[nickname] = value;
+            // Variable assignment with var.name = value
+            const variableAssignmentMatch = trimmedLine.match(/var\.(\w+)\s*=\s*(.*)/);
+            if (variableAssignmentMatch) {
+                const varName = variableAssignmentMatch[1];
+                const value = variableAssignmentMatch[2].trim();
+
+                // Handle number
+                if (/^-?\d+(\.\d+)?$/.test(value)) {
+                    variables[varName] = parseFloat(value);
+                } 
+                // Handle string
+                else if (/^".*"|'[^']*'$/.test(value)) {
+                    variables[varName] = value.replace(/^["']|["']$/g, ''); // Remove quotes
+                }
                 continue;
             }
 
-            // Text variable assignment with text.var.text("value")
-            const textVarMatch = trimmedLine.match(/text\.var\.(\w+)\s*\("?(.*)"?\)/);
-            if (textVarMatch) {
-                const textNickname = textVarMatch[1];
-                const textValue = textVarMatch[2];
-                textVariables[textNickname] = textValue;
-                continue;
-            }
-
-            // Addition operation
-            const sumMatch = trimmedLine.match(/math\.sum\s+(\w+)\s*\+\s*(\w+)\s*=\s*(\w+)/);
-            if (sumMatch) {
-                const operand1 = variables[sumMatch[1]] || 0;
-                const operand2 = variables[sumMatch[2]] || 0;
-                variables[sumMatch[3]] = operand1 + operand2;
-                continue;
-            }
-
-            // Output text variable using just the nickname
-            const printTextMatch = trimmedLine.match(/print\((\w+)\)/);
-            if (printTextMatch) {
-                const varToPrint = printTextMatch[1];
-                result += (textVariables[varToPrint] !== undefined ? textVariables[varToPrint] : "Undefined variable") + "\n";
-                continue;
-            }
-
-            // Output numeric variable using just the nickname
-            const printNumMatch = trimmedLine.match(/print\((\w+)\)/);
-            if (printNumMatch) {
-                const varToPrint = printNumMatch[1];
+            // Print variable using print(var.name)
+            const printMatch = trimmedLine.match(/print\((var\.\w+)\)/);
+            if (printMatch) {
+                const varToPrint = printMatch[1];
                 result += (variables[varToPrint] !== undefined ? variables[varToPrint] : "Undefined variable") + "\n";
                 continue;
             }
