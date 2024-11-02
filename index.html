@@ -19,9 +19,12 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            background-color: #fff;
+            background-color: #282c34;
+            color: #abb2bf;
             resize: none;
             transition: border-color 0.3s;
+            overflow: auto;
+            white-space: pre;
         }
         #editor:focus {
             border-color: #28a745;
@@ -58,6 +61,10 @@
         #fileInput {
             margin-top: 10px;
         }
+        .keyword { color: #569cd6; }
+        .variable { color: #d19a66; }
+        .string { color: #98c379; }
+        .error { color: #e06c75; }
     </style>
 </head>
 <body>
@@ -79,6 +86,7 @@
         const outputDiv = document.getElementById('output');
         outputDiv.textContent = output;
         outputDiv.classList.add('visible');
+        highlightCode(code);
     };
 
     document.getElementById('fileInput').addEventListener('change', function(event) {
@@ -87,6 +95,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('editor').value = e.target.result;
+                highlightCode(e.target.result);
             };
             reader.readAsText(file);
         }
@@ -152,6 +161,18 @@
         }
 
         return result.trim();
+    }
+
+    function highlightCode(code) {
+        const highlightedCode = code
+            .replace(/(var\.|print\()(\w+)(\))/g, '<span class="keyword">$1$2$3</span>') // Keywords
+            .replace(/(var\.\w+\s*=\s*)([^;]+)/g, (match, p1, p2) => {
+                const variable = p1 + '<span class="variable">' + p2 + '</span>';
+                return variable;
+            }) // Variable assignment
+            .replace(/("[^"]*"|'[^']*')/g, '<span class="string">$1</span>'); // Strings
+        
+        document.getElementById('editor').innerHTML = highlightedCode;
     }
 </script>
 
