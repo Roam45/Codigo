@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -55,27 +55,23 @@ goto start
             errorDiv.innerHTML = ''; // Clear previous errors
 
             try {
-                // Simple parser for Codigo code
                 const lines = code.split('\n');
                 let variables = {};
                 let labels = {};
-                let infiniteLoop = false;
 
+                // First pass: Store variables and labels
                 for (const line of lines) {
                     const trimmed = line.trim();
-                    // Check for variable assignment
                     if (trimmed.startsWith('var.')) {
                         const [varName, value] = trimmed.split('=');
                         variables[varName.split('.')[1].trim()] = value.trim();
-                    } 
-                    // Check for label definition
-                    else if (trimmed.endsWith(':')) {
+                    } else if (trimmed.endsWith(':')) {
                         const labelName = trimmed.slice(0, -1).trim();
                         labels[labelName] = trimmed;
                     }
                 }
 
-                // Execute code
+                // Second pass: Execute code
                 let currentLine = 0;
                 while (currentLine < lines.length) {
                     const line = lines[currentLine].trim();
@@ -88,7 +84,7 @@ goto start
                         }
                     } else if (line.startsWith('goto ')) {
                         const labelToGo = line.split(' ')[1].trim();
-                        if (labels[labelToGo]) {
+                        if (labelToGo in labels) {
                             currentLine = lines.indexOf(labels[labelToGo]);
                             continue; // Skip incrementing currentLine
                         } else {
