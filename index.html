@@ -24,21 +24,28 @@
             padding: 10px;
             white-space: pre-wrap; /* To maintain formatting */
         }
+        #result {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
-<!-- Using text variables to set the content -->
 <script>
     const text = {
         var: {
-            head: "Hello this is the codigo editor",
-            para: "Enter code"
+            head: "Calculator",
+            para: ""
         }
     };
 
     document.write(`<h1>${text.var.head}</h1>`);
-    document.write(`<p>${text.var.para}</p>`);
+
+    // Function to display the paragraph
+    function displayPara(content) {
+        text.var.para = content;
+        document.write(`<p>${text.var.para}</p>`);
+    }
 </script>
 
 <textarea id="codeInput" placeholder="Write your Codigo code here..."></textarea>
@@ -46,12 +53,15 @@
 
 <h2>Output</h2>
 <div id="output"></div>
+<div id="result"></div>
 
 <script>
     document.getElementById('runButton').addEventListener('click', () => {
         const code = document.getElementById('codeInput').value;
         const outputDiv = document.getElementById('output');
+        const resultDiv = document.getElementById('result');
         outputDiv.innerHTML = ''; // Clear previous output
+        resultDiv.innerHTML = ''; // Clear previous result
 
         try {
             // Simple parser for Codigo
@@ -103,6 +113,12 @@
                             outputDiv.innerHTML += variables[varToPrint] + '\n';
                         }
                     }
+                }
+
+                // Handle text variables for displaying paragraphs
+                if (line.startsWith('text.var.para')) {
+                    const content = line.split('=')[1].trim().replace(/["']/g, '');
+                    displayPara(content);
                 }
             });
         } catch (error) {
