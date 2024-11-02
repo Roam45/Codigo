@@ -33,14 +33,11 @@
 <body>
     <h1>Codigo Editor</h1>
     <textarea id="editor" placeholder="Write your Codigo code here...">
-var.count = 1
+var.x = 58
 
 start:
-print("Hello")
-
-if count < 20:
-    count = count + 1
-    goto start
+print(x)
+goto start
     </textarea>
     <button id="run">Run Code</button>
     <h2>Output</h2>
@@ -61,29 +58,46 @@ if count < 20:
                 // Simple parser for Codigo code
                 const lines = code.split('\n');
                 let variables = {};
+                let labels = {};
+                let infiniteLoop = false;
 
                 for (const line of lines) {
                     const trimmed = line.trim();
+                    // Check for variable assignment
                     if (trimmed.startsWith('var.')) {
                         const [varName, value] = trimmed.split('=');
-                        variables[varName.split('.')[1].trim()] = value.trim().replace(/"/g, '');
-                    } else if (trimmed.startsWith('print(')) {
-                        const varToPrint = trimmed.slice(6, -1).trim();
-                        // Check if it's a variable or a string to print
+                        variables[varName.split('.')[1].trim()] = value.trim();
+                    } 
+                    // Check for label definition
+                    else if (trimmed.endsWith(':')) {
+                        const labelName = trimmed.slice(0, -1).trim();
+                        labels[labelName] = trimmed;
+                    }
+                }
+
+                // Execute code
+                let currentLine = 0;
+                while (currentLine < lines.length) {
+                    const line = lines[currentLine].trim();
+                    if (line.startsWith('print(')) {
+                        const varToPrint = line.slice(6, -1).trim();
                         if (varToPrint in variables) {
                             outputDiv.innerHTML += variables[varToPrint] + '<br>';
                         } else {
                             outputDiv.innerHTML += varToPrint.replace(/"/g, '') + '<br>';
                         }
+                    } else if (line.startsWith('goto ')) {
+                        const labelToGo = line.split(' ')[1].trim();
+                        if (labels[labelToGo]) {
+                            currentLine = lines.indexOf(labels[labelToGo]);
+                            continue; // Skip incrementing currentLine
+                        } else {
+                            throw new Error(`Label "${labelToGo}" not found.`);
+                        }
                     }
+                    currentLine++;
                 }
 
-                // Handle the loop logic
-                let count = variables['count'] ? parseInt(variables['count']) : 1;
-                while (count < 20) {
-                    outputDiv.innerHTML += "Hello<br>";
-                    count++;
-                }
             } catch (error) {
                 errorDiv.innerHTML = error.message; // Show error message if there's an error
             }
