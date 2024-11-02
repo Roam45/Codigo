@@ -3,117 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Código Editor</title>
+    <title>Codigo Editor</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
+            margin: 20px;
         }
-        #editor {
+        textarea {
             width: 100%;
             height: 300px;
             font-family: monospace;
-            font-size: 16px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #fff;
-            resize: none;
         }
-        #runButton {
+        button {
             margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            padding: 10px;
         }
         #output {
             margin-top: 20px;
-            padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #fff;
-            white-space: pre-wrap;
+            padding: 10px;
+            white-space: pre-wrap; /* To maintain formatting */
         }
     </style>
 </head>
 <body>
 
-<h1>Código Editor</h1>
-<textarea id="editor" placeholder="Write your Código here...">
-print("Welcome to the Guess the Number Game!")
-var.correctNumber = 7
-print("Pick a number between 1 - 10:")
-input.var.guess()
+<h1>Codigo Editor</h1>
+<textarea id="codeInput" placeholder="Write your Codigo code here..."></textarea>
+<button id="runButton">Run Code</button>
 
-if input.var.guess == var.correctNumber
-    print("Correct! You guessed the number!")
-else
-    print("Incorrect! Try again.")
-</textarea>
-<button id="runButton">Run Código</button>
-
-<h2>Output:</h2>
+<h2>Output</h2>
 <div id="output"></div>
 
 <script>
-    document.getElementById('runButton').onclick = function() {
-        const code = document.getElementById('editor').value;
-        const output = runCodigoCode(code);
-        document.getElementById('output').textContent = output;
-    };
+    document.getElementById('runButton').addEventListener('click', () => {
+        const code = document.getElementById('codeInput').value;
+        const outputDiv = document.getElementById('output');
+        outputDiv.innerHTML = ''; // Clear previous output
 
-    function runCodigoCode(code) {
-        let result = "";
-        let variables = {};
+        try {
+            // Simple parser for Codigo
+            const lines = code.split('\n');
+            let variables = {};
+            let result;
 
-        const userInput = prompt("Pick a number between 1 - 10:");
-        variables.guess = parseInt(userInput);
-        variables.correctNumber = 7;
+            lines.forEach(line => {
+                line = line.trim();
+                
+                // Handle variable assignment
+                if (line.startsWith('var.')) {
+                    const [varName, value] = line.split('=').map(s => s.trim());
+                    variables[varName] = value.replace(/["']/g, '').trim(); // Remove quotes
+                }
 
-        const lines = code.split('\n');
-        
-        for (const line of lines) {
-            const trimmedLine = line.trim();
-
-            const printMatch = trimmedLine.match(/print\((.+)\)/);
-            if (printMatch) {
-                const contentToPrint = printMatch[1].trim();
-                if (contentToPrint.startsWith('var.')) {
-                    const varName = contentToPrint.split('.')[1];
-                    if (variables.hasOwnProperty(varName)) {
-                        result += variables[varName] + "\n";
-                    } else {
-                        result += `Undefined variable: ${varName}\n`;
+                // Handle math operations
+                const mathMatch = line.match(/Math\.(Add|Sub|Mul|Div)\(([^,]+), ([^,]+)\)/);
+                if (mathMatch) {
+                    const operation = mathMatch[1];
+                    const var1 = variables[mathMatch[2].trim()];
+                    const var2 = variables[mathMatch[3].trim()];
+                    
+                    if (var1 !== undefined && var2 !== undefined) {
+                        switch (operation) {
+                            case 'Add':
+                                result = parseFloat(var1) + parseFloat(var2);
+                                break;
+                            case 'Sub':
+                                result = parseFloat(var1) - parseFloat(var2);
+                                break;
+                            case 'Mul':
+                                result = parseFloat(var1) * parseFloat(var2);
+                                break;
+                            case 'Div':
+                                result = parseFloat(var1) / parseFloat(var2);
+                                break;
+                        }
+                        outputDiv.innerHTML += result + '\n';
                     }
-                } else {
-                    result += contentToPrint.replace(/['"]/g, '') + "\n";
                 }
-                continue;
-            }
 
-            const ifMatch = trimmedLine.match(/^if\s+input\.var\.guess\s*==\s*(\w+)$/);
-            if (ifMatch) {
-                if (variables.guess === variables.correctNumber) {
-                    result += 'Correct! You guessed the number!\n';
-                } else {
-                    result += 'Incorrect! Try again.\n';
+                // Handle print statements
+                if (line.startsWith('print')) {
+                    const printVar = line.match(/print\(([^)]+)\)/);
+                    if (printVar) {
+                        const varToPrint = printVar[1].trim().replace(/["']/g, '');
+                        if (variables[varToPrint] !== undefined) {
+                            outputDiv.innerHTML += variables[varToPrint] + '\n';
+                        }
+                    }
                 }
-                continue;
-            }
-
-            if (trimmedLine) {
-                result += `Error: Unrecognized command: "${trimmedLine}"\n`;
-            }
+            });
+        } catch (error) {
+            outputDiv.innerHTML = 'Error: ' + error.message;
         }
-
-        return result.trim();
-    }
+    });
 </script>
 
 </body>
