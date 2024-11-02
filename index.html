@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,128 +7,69 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin: 20px;
         }
         textarea {
-            width: 100%;
-            height: 300px;
-            font-family: monospace;
+            width: 80%;
+            height: 200px;
         }
-        button {
+        #output, #error {
+            border: 1px solid #ccc;
+            width: 80%;
+            min-height: 100px;
             margin-top: 10px;
             padding: 10px;
+            overflow: auto;
         }
-        #output {
-            margin-top: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            white-space: pre-wrap; /* To maintain formatting */
-        }
-        #result {
-            margin-top: 20px;
+        #error {
+            border-color: red;
+            background-color: #f8d7da;
         }
     </style>
 </head>
 <body>
+    <h1>Codigo Editor</h1>
+    <textarea id="editor" placeholder="Write your Codigo code here...">
+var.x = "hi"
+print(x)
+    </textarea>
+    <button id="run">Run Code</button>
+    <h2>Output</h2>
+    <div id="output"></div>
+    <h2>Error</h2>
+    <div id="error"></div>
 
-<script>
-    const text = {
-        var: {
-            head: "Calculator",
-            para: ""
-        }
-    };
+    <script>
+        document.getElementById('run').onclick = function() {
+            const code = document.getElementById('editor').value;
+            const outputDiv = document.getElementById('output');
+            const errorDiv = document.getElementById('error');
 
-    // Function to display the paragraph
-    function displayPara(content) {
-        text.var.para = content;
-        document.write(`<p>${text.var.para}</p>`);
-    }
-</script>
+            outputDiv.innerHTML = ''; // Clear previous output
+            errorDiv.innerHTML = ''; // Clear previous errors
 
-<textarea id="codeInput" placeholder="Write your Codigo code here..."></textarea>
-<button id="runButton">Run Code</button>
+            try {
+                // Simple parser for Codigo code
+                const lines = code.split('\n');
+                let variables = {};
 
-<h2>Output</h2>
-<div id="output"></div>
-<div id="result"></div>
-
-<script>
-    document.getElementById('runButton').addEventListener('click', () => {
-        const code = document.getElementById('codeInput').value;
-        const outputDiv = document.getElementById('output');
-        const resultDiv = document.getElementById('result');
-        outputDiv.innerHTML = ''; // Clear previous output
-        resultDiv.innerHTML = ''; // Clear previous result
-
-        try {
-            // Simple parser for Codigo
-            const lines = code.split('\n');
-            let variables = {};
-            let result;
-            let outputLines = []; // Array to store output lines
-
-            lines.forEach(line => {
-                line = line.trim();
-                
-                // Handle variable assignment
-                if (line.startsWith('var.')) {
-                    const [varName, value] = line.split('=').map(s => s.trim());
-                    variables[varName] = value.replace(/["']/g, '').trim(); // Remove quotes
-                }
-
-                // Handle math operations
-                const mathMatch = line.match(/Math\.(Add|Sub|Mul|Div)\(([^,]+), ([^,]+)\)/);
-                if (mathMatch) {
-                    const operation = mathMatch[1];
-                    const var1 = variables[mathMatch[2].trim()];
-                    const var2 = variables[mathMatch[3].trim()];
-                    
-                    if (var1 !== undefined && var2 !== undefined) {
-                        switch (operation) {
-                            case 'Add':
-                                result = parseFloat(var1) + parseFloat(var2);
-                                break;
-                            case 'Sub':
-                                result = parseFloat(var1) - parseFloat(var2);
-                                break;
-                            case 'Mul':
-                                result = parseFloat(var1) * parseFloat(var2);
-                                break;
-                            case 'Div':
-                                result = parseFloat(var1) / parseFloat(var2);
-                                break;
-                        }
-                        outputLines.push(result); // Add result to output lines
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed.startsWith('var.')) {
+                        const [varName, value] = trimmed.split('=');
+                        variables[varName.split('.')[1].trim()] = value.trim().replace(/"/g, '');
+                    } else if (trimmed.startsWith('print(')) {
+                        const varToPrint = trimmed.slice(6, -1).trim();
+                        outputDiv.innerHTML += variables[varToPrint] + '<br>';
                     }
                 }
-
-                // Handle print statements
-                if (line.startsWith('print')) {
-                    const printVar = line.match(/print\(([^)]+)\)/);
-                    if (printVar) {
-                        const varToPrint = printVar[1].trim().replace(/["']/g, '');
-                        if (variables[varToPrint] !== undefined) {
-                            outputLines.push(variables[varToPrint]); // Add variable to output lines
-                        }
-                    }
-                }
-
-                // Handle text variables for displaying paragraphs
-                if (line.startsWith('text.var.para')) {
-                    const content = line.split('=')[1].trim().replace(/["']/g, '');
-                    displayPara(content);
-                }
-            });
-
-            // Join output lines and set outputDiv innerHTML
-            outputDiv.innerHTML = outputLines.join('\n');
-        } catch (error) {
-            outputDiv.innerHTML = 'Error: ' + error.message;
-        }
-    });
-</script>
-
-
+            } catch (error) {
+                errorDiv.innerHTML = error.message; // Show error message if there's an error
+            }
+        };
+    </script>
 </body>
 </html>
