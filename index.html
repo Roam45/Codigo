@@ -68,13 +68,12 @@
         for (const line of lines) {
             const trimmedLine = line.trim();
 
-            // Variable assignment with var.variablename/varnickname
-            const assignmentMatch = trimmedLine.match(/var\.(\w+)\/(\w+)\s*=\s*(\d+)/);
-            if (assignmentMatch) {
-                const varName = assignmentMatch[1];
-                const nickname = assignmentMatch[2];
-                const value = parseInt(assignmentMatch[3], 10);
-                variables[nickname] = value; // Store value with nickname
+            // Numeric variable assignment with var.value.x
+            const numberAssignmentMatch = trimmedLine.match(/var\.value\.(\w+)\s*=\s*"(.*)"/);
+            if (numberAssignmentMatch) {
+                const nickname = numberAssignmentMatch[1];
+                const value = parseFloat(numberAssignmentMatch[2]); // Convert string to number
+                variables[nickname] = value; // Store numeric value with nickname
                 continue;
             }
 
@@ -135,8 +134,8 @@
                 continue;
             }
 
-            // Output numeric variable
-            const printNumMatch = trimmedLine.match(/print\(var\."(\w+)"\)/);
+            // Output numeric variable using just the nickname
+            const printNumMatch = trimmedLine.match(/print\((\w+)\)/);
             if (printNumMatch) {
                 const varToPrint = printNumMatch[1];
                 result += (variables[varToPrint] !== undefined ? variables[varToPrint] : "Undefined variable") + "\n";
