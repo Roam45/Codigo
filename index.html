@@ -62,11 +62,8 @@
         let result = "";
         let variables = {};
 
-        // Simulate user input for the guessing game
         const userInput = prompt("Pick a number between 1 - 10:");
         variables.guess = parseInt(userInput);
-
-        // Static correct answer for testing
         variables.correctNumber = 7;
 
         const lines = code.split('\n');
@@ -74,7 +71,6 @@
         for (const line of lines) {
             const trimmedLine = line.trim();
 
-            // Print function
             const printMatch = trimmedLine.match(/print\((.+)\)/);
             if (printMatch) {
                 const contentToPrint = printMatch[1].trim();
@@ -86,15 +82,13 @@
                         result += `Undefined variable: ${varName}\n`;
                     }
                 } else {
-                    result += contentToPrint.replace(/['"]/g, '') + "\n"; // Print string literals directly
+                    result += contentToPrint.replace(/['"]/g, '') + "\n";
                 }
                 continue;
             }
 
-            // Check condition
             const ifMatch = trimmedLine.match(/^if\s+input\.var\.guess\s*==\s*(\w+)$/);
             if (ifMatch) {
-                const expectedValue = ifMatch[1];
                 if (variables.guess === variables.correctNumber) {
                     result += 'Correct! You guessed the number!\n';
                 } else {
@@ -103,7 +97,6 @@
                 continue;
             }
 
-            // Handle invalid lines or other commands
             if (trimmedLine) {
                 result += `Error: Unrecognized command: "${trimmedLine}"\n`;
             }
