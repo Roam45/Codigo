@@ -61,39 +61,45 @@
     function runCodigoCode(code) {
         let result = "";
         let variables = {};
-        
+
         const lines = code.split('\n');
         
         for (const line of lines) {
             const trimmedLine = line.trim();
 
-            // Variable assignment with var.name = value
-            const variableAssignmentMatch = trimmedLine.match(/var\.(\w+)\s*=\s*(.+)/);
-            if (variableAssignmentMatch) {
-                const varName = variableAssignmentMatch[1];
-                const value = variableAssignmentMatch[2].trim();
+            // Input prompt
+            if (trimmedLine.startsWith("input.var.x()")) {
+                let x = prompt("Pick a number between 1 - 10");
+                x = parseInt(x);
+                variables.x = x;
+                continue;
+            }
 
-                // Handle number
-                if (/^-?\d+(\.\d+)?$/.test(value)) {
-                    variables[varName] = parseFloat(value);
-                } 
-                // Handle string
-                else if (/^".*"$/.test(value) || /^'.*'$/.test(value)) {
-                    variables[varName] = value.slice(1, -1); // Remove quotes
+            // Check condition
+            const ifMatch = trimmedLine.match(/^if\s+input\.var\.x\s*==\s*(\d+)$/);
+            if (ifMatch) {
+                const value = parseInt(ifMatch[1]);
+                if (variables.x === value) {
+                    result += 'correct\n';
                 } else {
-                    result += `Error: Invalid value assigned to ${varName}\n`;
+                    result += 'incorrect\n';
                 }
                 continue;
             }
 
-            // Print variable using print(var.name)
-            const printMatch = trimmedLine.match(/print\((var\.(\w+))\)/);
+            // Print using print()
+            const printMatch = trimmedLine.match(/print\((.+)\)/);
             if (printMatch) {
-                const varToPrint = printMatch[2];
-                if (variables.hasOwnProperty(varToPrint)) {
-                    result += variables[varToPrint] + "\n";
+                const contentToPrint = printMatch[1].trim();
+                if (contentToPrint.startsWith('var.')) {
+                    const varName = contentToPrint.split('.')[1];
+                    if (variables.hasOwnProperty(varName)) {
+                        result += variables[varName] + "\n";
+                    } else {
+                        result += `Undefined variable: ${varName}\n`;
+                    }
                 } else {
-                    result += `Undefined variable: ${varToPrint}\n`;
+                    result += contentToPrint.replace(/['"]/g, '') + "\n"; // Print string literals directly
                 }
                 continue;
             }
