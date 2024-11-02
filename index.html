@@ -122,13 +122,29 @@
         for (const line of lines) {
             const trimmedLine = line.trim();
 
-            // Variable assignment with var.x = value
+            // Variable assignment like var.x = value
             const variableAssignmentMatch = trimmedLine.match(/var\.(\w+)\s*=\s*(.+)/);
             if (variableAssignmentMatch) {
                 const varName = variableAssignmentMatch[1];
                 const value = variableAssignmentMatch[2].trim();
 
-                // Handle arithmetic expressions
+                // Check for math operations like math.sum x + y = var.z
+                const mathOperationMatch = value.match(/math\.(\w+)\s+(.+)\s*=\s*(var\.\w+)/);
+                if (mathOperationMatch) {
+                    const operation = mathOperationMatch[1];
+                    const operands = mathOperationMatch[2].trim();
+                    const resultVarName = mathOperationMatch[3].substring(4); // Remove 'var.'
+                    
+                    const evaluatedResult = evaluateMathOperation(operation, operands, variables);
+                    if (evaluatedResult !== null) {
+                        variables[resultVarName] = evaluatedResult;
+                    } else {
+                        result += `Error: Invalid operation or undefined variable in "${line}"\n`;
+                    }
+                    continue;
+                }
+
+                // Evaluate simple expressions
                 const evaluatedValue = evaluateExpression(value, variables);
                 if (evaluatedValue !== null) {
                     variables[varName] = evaluatedValue;
@@ -159,6 +175,34 @@
         return result.trim();
     }
 
+    function evaluateMathOperation(operation, operands, variables) {
+        const operandList = operands.split(/\s*\+\s*|\s*-\s*|\s*\*\s*|\s*\//); // Split by operators
+        let result = null;
+
+        for (const operand of operandList) {
+            const value = evaluateExpression(operand.trim(), variables);
+            if (value === null) {
+                return null; // If any operand is invalid, return null
+            }
+            if (result === null) {
+                result = value; // Initialize result
+            } else {
+                // Perform the operation based on the specified operation type
+                if (operation === "sum") {
+                    result += value; // Addition
+                } else if (operation === "sub") {
+                    result -= value; // Subtraction
+                } else if (operation === "mul") {
+                    result *= value; // Multiplication
+                } else if (operation === "div") {
+                    result /= value; // Division
+                }
+            }
+        }
+
+        return result;
+    }
+
     function evaluateExpression(expr, variables) {
         // Handle variable references
         const variableMatch = expr.match(/var\.(\w+)/);
@@ -171,7 +215,7 @@
             }
         }
 
-        // Evaluate arithmetic expressions
+        // Evaluate simple arithmetic expressions
         try {
             const sanitizedExpr = expr
                 .replace(/var\.(\w+)/g, (match) => {
