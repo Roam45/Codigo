@@ -1,81 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Code Editor</title>
-
-    <!-- Include CodeMirror Stylesheets -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
-    
-    <!-- CodeMirror Python Mode -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
-    
-    <!-- CodeMirror Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-
-        .editor-container {
-            width: 100%;
-            height: 400px;
-            background-color: #2d2d2d;
-            border-radius: 8px;
-        }
-
-        .editor-button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #444;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-        }
-        
-        .editor-button:hover {
-            background-color: #555;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Código - Simple Code Editor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      width: 80%;
+      max-width: 800px;
+      text-align: center;
+    }
+    textarea {
+      width: 100%;
+      height: 300px;
+      margin: 10px 0;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: none;
+      background-color: #f8f8f8;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #222;
+      color: white;
+      border-radius: 4px;
+      min-height: 50px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
 </head>
 <body>
 
-    <h1>Python Code Editor</h1>
-    
-    <!-- CodeMirror Editor Container -->
-    <div id="editor" class="editor-container"></div>
+  <div class="container">
+    <h1>Código - Simple Code Editor</h1>
+    <textarea id="codeArea" placeholder="Write Código code here..."></textarea>
+    <br>
+    <button onclick="runCode()">Run Code</button>
+    <div id="output"></div>
+  </div>
 
-    <!-- Button to get code -->
-    <button class="editor-button" onclick="getCode()">Get Code</button>
+  <script>
+    function runCode() {
+      const code = document.getElementById('codeArea').value;
+      const outputDiv = document.getElementById('output');
+      outputDiv.textContent = ''; // Clear previous output
 
-    <script>
-        // Initialize CodeMirror Editor with Python mode
-        var editor = CodeMirror(document.getElementById("editor"), {
-            mode: "python",
-            theme: "dracula",
-            lineNumbers: true,
-            tabSize: 4,
-            indentUnit: 4,
-            lineWrapping: true,
-            smartIndent: true,
-            showCursorWhenSelecting: true,
-            autoCloseBrackets: true,
-            autoCloseTags: true
-        });
+      // Variables storage
+      let variables = {};
 
-        // Function to get the current code from the editor
-        function getCode() {
-            var code = editor.getValue();
-            alert("Your Python Code: \n" + code);
+      // Basic language interpreter for Código
+      const lines = code.split('\n');
+      let output = '';
+
+      lines.forEach(line => {
+        line = line.trim(); // Trim whitespace
+
+        // Skip empty lines
+        if (line === "") return;
+
+        // Handle variable assignment: "var varName = value"
+        if (line.startsWith('var ')) {
+          const assignment = line.slice(4); // Remove "var "
+          const [varName, expr] = assignment.split('=').map(s => s.trim());
+
+          if (varName && expr !== undefined) {
+            // Check if the expression is a string
+            if (expr.startsWith('"') && expr.endsWith('"')) {
+              variables[varName] = expr.slice(1, -1); // Remove the quotes and store the string
+            } else {
+              // Otherwise, treat it as a numeric expression
+              try {
+                const value = evalExpression(expr, variables);
+                variables[varName] = value;
+              } catch (e) {
+                output += `Error: Invalid expression in "${line}"\n`;
+              }
+            }
+          } else {
+            output += `Error: Invalid variable assignment syntax in "${line}"\n`;
+          }
         }
-    </script>
-    
+
+        // Handle print statements: "print variable" or "print expression"
+        else if (line.startsWith('print ')) {
+          const printExpr = line.slice(6).trim();
+          if (variables[printExpr] !== undefined) {
+            output += variables[printExpr] + '\n';
+          } else if (!isNaN(printExpr)) {
+            output += printExpr + '\n'; // Print literal number
+          } else {
+            try {
+              const value = evalExpression(printExpr, variables);
+              output += value + '\n';
+            } catch (e) {
+              output += `Error: Invalid expression in "print ${printExpr}"\n`;
+            }
+          }
+        } else {
+          output += `Error: Unknown command at "${line}"\n`;
+        }
+      });
+
+      outputDiv.textContent = output;
+    }
+
+    // Helper function to evaluate expressions (basic math and variables)
+    function evalExpression(expr, variables) {
+      // Replace variable names with their values
+      for (let [varName, value] of Object.entries(variables)) {
+        const regExp = new RegExp(`\\b${varName}\\b`, 'g');
+        expr = expr.replace(regExp, value);
+      }
+      // Evaluate the expression safely
+      return Function('"use strict"; return (' + expr + ')')();
+    }
+  </script>
+
 </body>
 </html>
