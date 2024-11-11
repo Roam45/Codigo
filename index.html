@@ -1,148 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Código - Simple Code Editor</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f4f4f9;
-    }
-    .container {
-      width: 80%;
-      max-width: 800px;
-      text-align: center;
-    }
-    textarea {
-      width: 100%;
-      height: 300px;
-      margin: 10px 0;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      resize: none;
-      background-color: #f8f8f8;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    #output {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #222;
-      color: white;
-      border-radius: 4px;
-      min-height: 50px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codigo Interpreter</title>
+    <style>
+        /* Global styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Container for the interpreter */
+        .interpreter-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            height: 70%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        /* Fade in animation */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Title */
+        .interpreter-container h1 {
+            color: #ff7e5f;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        /* Code input and output area */
+        .code-area {
+            background-color: #2d2d2d;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+            animation: slideIn 1.5s ease-in-out;
+        }
+
+        /* Animation for code area */
+        @keyframes slideIn {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Input field for Codigo code */
+        .input-area {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-area input {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            outline: none;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .input-area input:focus {
+            border-color: #ff7e5f;
+            box-shadow: 0 0 5px rgba(255, 126, 95, 0.8);
+        }
+
+        /* Button to run the code */
+        .run-button {
+            background-color: #ff7e5f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .run-button:hover {
+            background-color: #feb47b;
+        }
+
+        /* Output area (where results are shown) */
+        .output-area {
+            background-color: #1e1e1e;
+            color: #feb47b;
+            padding: 20px;
+            border-radius: 10px;
+            height: 100px;
+            overflow-y: auto;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Código - Simple Code Editor</h1>
-    <textarea id="codeArea" placeholder="Write Código code here..."></textarea>
-    <br>
-    <button onclick="runCode()">Run Code</button>
-    <div id="output"></div>
-  </div>
+    <div class="interpreter-container">
+        <h1>Codigo Interpreter</h1>
+        
+        <!-- Display Code Output -->
+        <div class="code-area" id="codeOutput">
+            <!-- The results of the Codigo code will appear here -->
+        </div>
 
-  <script>
-    function runCode() {
-      const code = document.getElementById('codeArea').value;
-      const outputDiv = document.getElementById('output');
-      outputDiv.textContent = ''; // Clear previous output
+        <!-- Code Input Area -->
+        <div class="input-area">
+            <input type="text" id="codigoInput" placeholder="Enter Codigo code...">
+            <button class="run-button" onclick="runCodigo()">Run Codigo</button>
+        </div>
 
-      // Variables storage
-      let variables = {};
+        <!-- Display Result Output -->
+        <div class="output-area" id="outputResult">
+            <!-- Execution result will be shown here -->
+        </div>
+    </div>
 
-      // Basic language interpreter for Código
-      const lines = code.split('\n');
-      let output = '';
+    <script>
+        // Basic interpreter for the "Codigo" language
+        let variables = {}; // Store variables
+        let output = "";
 
-      lines.forEach(line => {
-        line = line.trim(); // Trim whitespace
+        // Run the Codigo code
+        function runCodigo() {
+            const input = document.getElementById("codigoInput").value.trim();
+            if (input === "") return;
 
-        // Skip empty lines
-        if (line === "") return;
+            // Process input
+            let tokens = input.split(" ");
+            let command = tokens[0];
 
-        // Handle variable assignment: "var varName = value"
-        if (line.startsWith('var ')) {
-          const assignment = line.slice(4); // Remove "var "
-          const [varName, expr] = assignment.split('=').map(s => s.trim());
-
-          if (varName && expr !== undefined) {
-            // Check if the expression is a string
-            if (expr.startsWith('"') && expr.endsWith('"')) {
-              variables[varName] = expr.slice(1, -1); // Remove the quotes and store the string
+            if (command === "var" || command === "text") {
+                assignVariable(tokens);
+            } else if (command === "print") {
+                printVariable(tokens);
+            } else if (command === "math") {
+                performMath(tokens);
             } else {
-              // Otherwise, treat it as a numeric expression
-              try {
-                const value = evalExpression(expr, variables);
-                variables[varName] = value;
-              } catch (e) {
-                output += `Error: Invalid expression in "${line}"\n`;
-              }
+                output += "Unknown command: " + command + "\n";
             }
-          } else {
-            output += `Error: Invalid variable assignment syntax in "${line}"\n`;
-          }
+
+            // Update the output area with the result
+            document.getElementById("codeOutput").textContent = input;
+            document.getElementById("outputResult").textContent = output;
+
+            // Clear the input field
+            document.getElementById("codigoInput").value = "";
         }
 
-        // Handle print statements: "print variable" or "print expression"
-        else if (line.startsWith('print ')) {
-          const printExpr = line.slice(6).trim();
-          if (variables[printExpr] !== undefined) {
-            output += variables[printExpr] + '\n';
-          } else if (!isNaN(printExpr)) {
-            output += printExpr + '\n'; // Print literal number
-          } else {
-            try {
-              const value = evalExpression(printExpr, variables);
-              output += value + '\n';
-            } catch (e) {
-              output += `Error: Invalid expression in "print ${printExpr}"\n`;
+        // Assign variable (integer or text)
+        function assignVariable(tokens) {
+            let type = tokens[0];
+            let varName = tokens[1];
+            let value = tokens[3];
+
+            if (type === "var") {
+                variables[varName] = parseInt(value);
+            } else if (type === "text") {
+                variables[varName] = value.replace(/"/g, '');
             }
-          }
-        } else {
-          output += `Error: Unknown command at "${line}"\n`;
+            output += "Assigned " + varName + " = " + variables[varName] + "\n";
         }
-      });
 
-      outputDiv.textContent = output;
-    }
+        // Print variable
+        function printVariable(tokens) {
+            let varName = tokens[1];
+            if (variables.hasOwnProperty(varName)) {
+                output += variables[varName] + "\n";
+            } else {
+                output += "Variable " + varName + " not found!\n";
+            }
+        }
 
-    // Helper function to evaluate expressions (basic math and variables)
-    function evalExpression(expr, variables) {
-      // Replace variable names with their values
-      for (let [varName, value] of Object.entries(variables)) {
-        const regExp = new RegExp(`\\b${varName}\\b`, 'g');
-        expr = expr.replace(regExp, value);
-      }
-      // Evaluate the expression safely
-      return Function('"use strict"; return (' + expr + ')')();
-    }
-  </script>
+        // Perform math operation
+        function performMath(tokens) {
+            let var1 = tokens[1];
+            let operator = tokens[2];
+            let var2 = tokens[3];
 
+            if (operator === "*") {
+                if (variables.hasOwnProperty(var1) && variables.hasOwnProperty(var2)) {
+                    let result = variables[var1] * variables[var2];
+                    output += "Result: " + result + "\n";
+                }
+            } else {
+                output += "Unknown operator: " + operator + "\n";
+            }
+        }
+    </script>
+    
 </body>
 </html>
