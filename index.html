@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -24,9 +24,9 @@
             padding: 20px 40px;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            max-width: 800px;
             width: 100%;
-            height: 70%;
+            height: 80%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -80,23 +80,25 @@
             }
         }
 
-        /* Input field for Codigo code */
+        /* Input area for Codigo code */
         .input-area {
             display: flex;
             flex-direction: column;
         }
 
-        .input-area input {
+        /* Multi-line input area (textarea) */
+        .input-area textarea {
             padding: 10px;
             font-size: 1rem;
             border-radius: 5px;
             border: 1px solid #ddd;
             outline: none;
-            margin-bottom: 10px;
+            resize: vertical;
+            height: 150px;
             transition: all 0.3s ease;
         }
 
-        .input-area input:focus {
+        .input-area textarea:focus {
             border-color: #ff7e5f;
             box-shadow: 0 0 5px rgba(255, 126, 95, 0.8);
         }
@@ -143,7 +145,7 @@
 
         <!-- Code Input Area -->
         <div class="input-area">
-            <input type="text" id="codigoInput" placeholder="Enter Codigo code...">
+            <textarea id="codigoInput" placeholder="Enter Codigo code..."></textarea>
             <button class="run-button" onclick="runCodigo()">Run Codigo</button>
         </div>
 
@@ -163,8 +165,23 @@
             const input = document.getElementById("codigoInput").value.trim();
             if (input === "") return;
 
-            // Process input
-            let tokens = input.split(" ");
+            // Split input into lines
+            let lines = input.split("\n");
+            lines.forEach(line => {
+                processLine(line.trim());
+            });
+
+            // Update the output area with the result
+            document.getElementById("codeOutput").textContent = input;
+            document.getElementById("outputResult").textContent = output;
+
+            // Clear the input field
+            document.getElementById("codigoInput").value = "";
+        }
+
+        // Process each line of Codigo code
+        function processLine(line) {
+            let tokens = line.split(" ");
             let command = tokens[0];
 
             if (command === "var" || command === "text") {
@@ -173,16 +190,9 @@
                 printVariable(tokens);
             } else if (command === "math") {
                 performMath(tokens);
-            } else {
+            } else if (line !== "") {
                 output += "Unknown command: " + command + "\n";
             }
-
-            // Update the output area with the result
-            document.getElementById("codeOutput").textContent = input;
-            document.getElementById("outputResult").textContent = output;
-
-            // Clear the input field
-            document.getElementById("codigoInput").value = "";
         }
 
         // Assign variable (integer or text)
