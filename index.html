@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codigo Interpreter</title>
+    <title>Codigo Interpreter on Steroids</title>
     <style>
         /* Global styles */
         body {
@@ -136,7 +136,7 @@
 <body>
 
     <div class="interpreter-container">
-        <h1>Codigo Interpreter</h1>
+        <h1>Codigo Interpreter (C++-like)</h1>
         
         <!-- Display Code Output -->
         <div class="code-area" id="codeOutput">
@@ -156,9 +156,10 @@
     </div>
 
     <script>
-        // Basic interpreter for the "Codigo" language
-        let variables = {}; // Store variables
+        // Store variables in a map
+        let variables = {}; // Supports all types (int, float, string)
         let output = "";
+        let functions = {}; // Store user-defined functions
 
         // Run the Codigo code
         function runCodigo() {
@@ -184,28 +185,41 @@
             let tokens = line.split(" ");
             let command = tokens[0];
 
-            if (command === "var" || command === "text") {
+            if (command === "var" || command === "float" || command === "text") {
                 assignVariable(tokens);
             } else if (command === "print") {
                 printVariable(tokens);
-            } else if (command === "math") {
-                performMath(tokens);
+            } else if (command === "if") {
+                processIf(tokens);
+            } else if (command === "while") {
+                processWhile(tokens);
+            } else if (command === "func") {
+                defineFunction(tokens);
+            } else if (command === "return") {
+                returnFromFunction(tokens);
+            } else if (command === "call") {
+                callFunction(tokens);
             } else if (line !== "") {
                 output += "Unknown command: " + command + "\n";
             }
         }
 
-        // Assign variable (integer or text)
+        // Assign variables (supports int, float, string)
         function assignVariable(tokens) {
             let type = tokens[0];
             let varName = tokens[1];
             let value = tokens[3];
 
-            if (type === "var") {
-                variables[varName] = parseInt(value);
+            if (type === "var" || type === "float") {
+                if (value.includes(".")) { // Floating-point number
+                    variables[varName] = parseFloat(value);
+                } else { // Integer
+                    variables[varName] = parseInt(value);
+                }
             } else if (type === "text") {
                 variables[varName] = value.replace(/"/g, '');
             }
+
             output += "Assigned " + varName + " = " + variables[varName] + "\n";
         }
 
@@ -219,20 +233,48 @@
             }
         }
 
-        // Perform math operation
-        function performMath(tokens) {
-            let var1 = tokens[1];
-            let operator = tokens[2];
-            let var2 = tokens[3];
-
-            if (operator === "*") {
-                if (variables.hasOwnProperty(var1) && variables.hasOwnProperty(var2)) {
-                    let result = variables[var1] * variables[var2];
-                    output += "Result: " + result + "\n";
-                }
+        // Process "if" statements
+        function processIf(tokens) {
+            let condition = tokens.slice(1).join(" ");
+            if (eval(condition)) {
+                output += "Condition passed: " + condition + "\n";
             } else {
-                output += "Unknown operator: " + operator + "\n";
+                output += "Condition failed: " + condition + "\n";
             }
+        }
+
+        // Process "while" loops
+        function processWhile(tokens) {
+            let condition = tokens.slice(1).join(" ");
+            let count = 0;
+            while (eval(condition) && count < 10) { // limit to 10 iterations to prevent infinite loops
+                output += "While loop: " + condition + "\n";
+                count++;
+            }
+        }
+
+        // Define functions
+        function defineFunction(tokens) {
+            let funcName = tokens[1];
+            let params = tokens.slice(2).join(" ").replace(/[()]/g, '').split(",");
+            functions[funcName] = { params };
+            output += "Function defined: " + funcName + "\n";
+        }
+
+        // Call a function
+        function callFunction(tokens) {
+            let funcName = tokens[1];
+            let args = tokens.slice(2).join(" ").replace(/[()]/g, '').split(",");
+            if (functions[funcName]) {
+                output += "Calling function: " + funcName + " with args: " + args.join(", ") + "\n";
+            } else {
+                output += "Function " + funcName + " not defined!\n";
+            }
+        }
+
+        // Return from function (basic placeholder for now)
+        function returnFromFunction(tokens) {
+            output += "Return statement: " + tokens.slice(1).join(" ") + "\n";
         }
     </script>
     
